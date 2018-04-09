@@ -3,6 +3,5 @@ __pycache__/
 *.pyc
 *.swp
 *.sqlite3
+*.ini
 Pipfile.lock
-strangework.ini
-wsgi.py

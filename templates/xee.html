@@ -28,6 +28,8 @@
       </div>
     </div>
     <script>
+      // Capture backend-provided values
+      var app_root = '{{ app_root }}'
       var tracks = JSON.parse('{{ tracks | tojson | safe }}');
       console.log(tracks)
       for (var i = 0; i < tracks.length; i++) {
@@ -53,7 +55,7 @@
         // Replace existing comments
         $('#comments').empty();
         // Get comments from server
-        $.ajax("/song/"+tracks[ndx].id)
+        $.ajax(app_root + "/song/" + tracks[ndx].id)
           .done(function(comments) {
             console.log(comments);
             for (var i = 0; i < comments.length; i++) {
@@ -71,7 +73,7 @@
         $('#comment-submission').val('');
 
         $.ajax({
-          url: '/comment',
+          url: app_root + '/comment',
           type: 'POST',
           contentType: 'application/json',
           data: JSON.stringify(comment)

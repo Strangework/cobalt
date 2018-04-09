@@ -17,8 +17,8 @@ SPOTIFY_AUTH_URL = 'https://accounts.spotify.com/authorize'
 SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token'
 
 # !! : Have this URI depend on release/debug
-AUTH_REDIRECT_URI = 'http://127.0.0.1:5000/callback'
-# AUTH_REDIRECT_URI = 'http://strangework.net/xee/callback'
+# AUTH_REDIRECT_URI = 'http://127.0.0.1:5000/callback'
+AUTH_REDIRECT_URI = 'http://strangework.net/xee/callback'
 
 
 # Spotify app information
@@ -105,8 +105,10 @@ def xee():
         curr_track['id'] = track['track']['id']
         tracks.append(curr_track)
 
+    # !! : Have app_root be set from a configuration file
     return flask.render_template(
       'xee.html',
+      app_root='/xee',
       spotify_name=user_id,
       tracks=tracks,
       playlist_names=playlist_names
