@@ -7,7 +7,6 @@ import sqlite3
 
 app = flask.Flask(__name__)
 
-
 # Generate secret key for encrypting cookies and session data
 app.secret_key = os.urandom(24)
 
@@ -132,7 +131,7 @@ def xee_callback():
     token_data = token_resp.json()
     flask.session['access_token'] = token_data['access_token']
 
-    return flask.redirect('/')
+    return flask.redirect(flask.url_for('xee'))
 
 
 # Returns an array of comments for the provided song in the structure below
