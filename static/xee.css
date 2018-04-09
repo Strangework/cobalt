@@ -1,0 +1,51 @@
+@import url(https://fonts.googleapis.com/css?family=Philosopher);
+
+body {
+  background-color: #111111;
+  font-family: 'Philosopher';
+}
+
+h1 {
+  color: #70AAFF;
+}
+
+h2 {
+  color: #70AAFF;
+}
+
+p {
+  color: #70AAFF;
+}
+
+b {
+  color: #70AAFF;
+}
+
+a.track {
+  text-decoration: none;
+  color: #70AAFF;
+}
+
+div#wrapper {
+  padding: 0px 8px 0px 8px ;
+  background-color: #222222;
+  border-radius: 40px 0px 40px 0px;
+}
+
+div#navbar {
+  width: 100%;
+  background-color: #333333;
+}
+
+div#action {
+  width: 100%;
+  background-color: #222222;
+}
+
+textarea#comment-submission {
+  width: 100%;
+  background-color:#111111;
+  color: #70AAFF;
+  border: 1px solid #111111;
+  border-radius: 10px;
+}

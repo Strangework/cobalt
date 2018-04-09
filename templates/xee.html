@@ -1,0 +1,84 @@
+<html>
+  <head>  
+    <title>(x)ee</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='xee.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <div id="wrapper"> 
+      <p align="right" style="color:#90EE90">{{ spotify_name }}</p>
+      <center>
+      <h1>{{ playlist_names }}</h1>
+      </center>
+      <div id="action">
+        <center>
+          <img id="cover_art" src="" style="max-width:60%;height:auto"></img>
+          <h1 id="title"></h1>
+          <h2 id="artist"></h2>
+        </center>
+        <div id="comments"></div>
+        <center>
+          <textarea id="comment-submission" rows="6"></textarea>
+          </br>
+          <button onclick="submitComment()">Submit</button>
+        </center>
+      </div>
+      <div id="navbar">
+      </div>
+    </div>
+    <script>
+      var tracks = JSON.parse('{{ tracks | tojson | safe }}');
+      console.log(tracks)
+      for (var i = 0; i < tracks.length; i++) {
+        $('#navbar').append('<a class="track" href="javascript:selectTrack('+i+');"><b>'+tracks[i].title+'</b> by <b>'+tracks[i].artist+'</b></p>');
+      }
+      // !! : How to avoid global variable?
+      var CURR_TRACK = tracks.length-1;
+      selectTrack(tracks.length-1);
+
+
+      function selectTrack(ndx) {
+        // Set state
+        CURR_TRACK = ndx;
+
+        // Set cover art, title, and artist
+        $('#cover_art').attr('src', tracks[ndx].art_url); 
+        $('#title').text(tracks[ndx].title);
+        $('#artist').text(tracks[ndx].artist);
+        
+        // Remove comment contents
+        $('#comment-submission').val('');
+
+        // Replace existing comments
+        $('#comments').empty();
+        // Get comments from server
+        $.ajax("/song/"+tracks[ndx].id)
+          .done(function(comments) {
+            console.log(comments);
+            for (var i = 0; i < comments.length; i++) {
+              $('#comments').append('<b>'+comments[i].user+'</b></br><p>'+comments[i].comment+'</p>');
+            }
+          });
+      }
+
+      function submitComment() {
+        var comment = {
+          song_id: tracks[CURR_TRACK].id,
+          comment: $('#comment-submission').val()
+        };
+        console.log(comment)
+        $('#comment-submission').val('');
+
+        $.ajax({
+          url: '/comment',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify(comment)
+        }).done(function(data) {
+          selectTrack(CURR_TRACK); 
+        });
+      }
+    </script>
+  </body>
+</html>
