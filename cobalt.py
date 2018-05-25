@@ -53,64 +53,26 @@ def xee():
       "Authorization": "Bearer {}".format(flask.session['access_token'])
     }
 
-    # Get user information
-    spotify_profile_url = 'https://api.spotify.com/v1/me'
-    profile_resp = requests.get(
-      spotify_profile_url,
-      headers=authorization_header
-    )
-    profile_data = profile_resp.json()
-    user_id = profile_data['id']
-    profile_url = profile_data['href']
-
-    # Store user's Spotify user ID in the session
-    flask.session['spotify_user_id'] = user_id
-
     # Get user's collaborative playlists
     playlist_query_resp = requests.get(
-      '{}/playlists'.format(profile_url),
+      '{}/playlists'.format(flask.session['spotify_profile_url']),
       headers=authorization_header
     )
     playlist_query_data = playlist_query_resp.json()
-    # Currently only pulls up (x)ee
-    playlist_names = ''
-    playlist_url = ''
+    playlists = []
     for item in playlist_query_data['items']:
-        if item['collaborative'] and item['name'] == '(x)ee':
-            playlist_names += item['name'] + " "
-            playlist_url = item['href']
-            print("HEY! " + playlist_url)
-
-    # Get playlist object
-    playlist_resp = requests.get(playlist_url, headers=authorization_header)
-    playlist_data = playlist_resp.json()
-    print(playlist_data)
-
-    # Track storage format
-    # [
-    # {
-    #   "title":"",
-    #   "artist":"",
-    #   "art_url":"",
-    #   "id":""
-    # }
-    # ]
-    tracks = []
-    for track in playlist_data['tracks']['items']:
-        curr_track = {}
-        curr_track['title'] = track['track']['name']
-        curr_track['artist'] = track['track']['artists'][0]['name']
-        curr_track['art_url'] = track['track']['album']['images'][0]['url']
-        curr_track['id'] = track['track']['id']
-        tracks.append(curr_track)
+        if item['collaborative']:
+            playlists.append({
+              'name': item['name'],
+              'id': item['id']
+            })
 
     # !! : Have app_root be set from a configuration file
     return flask.render_template(
       'xee.html',
       app_root='/xee',
-      spotify_name=user_id,
-      tracks=tracks,
-      playlist_names=playlist_names
+      spotify_name=flask.session['spotify_user_id'],
+      playlists=playlists
     )
 
 
@@ -131,7 +93,60 @@ def xee_callback():
     token_data = token_resp.json()
     flask.session['access_token'] = token_data['access_token']
 
+    # Build authorization header
+    authorization_header = {
+      "Authorization": "Bearer {}".format(flask.session['access_token'])
+    }
+
+    # Get user information and store in session
+    spotify_profile_url = 'https://api.spotify.com/v1/me'
+    profile_resp = requests.get(
+      spotify_profile_url,
+      headers=authorization_header
+    )
+    profile_data = profile_resp.json()
+    user_id = profile_data['id']
+
+    # Store user's Spotify user ID in the session
+    flask.session['spotify_user_id'] = user_id
+    flask.session['spotify_profile_url'] = profile_data['href']
+
     return flask.redirect(flask.url_for('xee'))
+
+
+# Returns an array of tracks in the structure below
+# [
+# {
+#   "title":"",
+#   "artist":"",
+#   "art_url":"",
+#   "id":""
+# }
+# ]
+@app.route('/playlist/<id>')
+def get_playlist(id):
+    # Build authorization header
+    authorization_header = {
+      "Authorization": "Bearer {}".format(flask.session['access_token'])
+    }
+
+    # Get playlist object
+    playlist_url = 'https://api.spotify.com/v1/users/{0}/playlists/{1}'.format(flask.session['spotify_user_id'],id)
+    playlist_resp = requests.get(playlist_url, headers=authorization_header)
+    playlist_data = playlist_resp.json()
+    print(playlist_data)
+
+    tracks = []
+    for track in playlist_data['tracks']['items']:
+        curr_track = {}
+        curr_track['title'] = track['track']['name']
+        curr_track['artist'] = track['track']['artists'][0]['name']
+        curr_track['art_url'] = track['track']['album']['images'][0]['url']
+        curr_track['id'] = track['track']['id']
+        tracks.append(curr_track)
+
+    print(tracks)
+    return(flask.jsonify(tracks))
 
 
 # Returns an array of comments for the provided song in the structure below

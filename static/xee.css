@@ -27,7 +27,9 @@ a.track {
 }
 
 div#wrapper {
-  padding: 0px 8px 0px 8px ;
+  display: flex;
+  flex-direction: column;
+  padding: 0px 8px 40px 8px;
   background-color: #222222;
   border-radius: 40px 0px 40px 0px;
 }
@@ -38,6 +40,14 @@ div#navbar {
 }
 
 div#action {
+  width: 100%;
+  background-color: #222222;
+}
+
+div#footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
   width: 100%;
   background-color: #222222;
 }

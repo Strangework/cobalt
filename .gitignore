@@ -4,4 +4,5 @@ __pycache__/
 *.swp
 *.sqlite3
 *.ini
+node_modules
 Pipfile.lock

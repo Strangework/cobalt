@@ -26,23 +26,49 @@
       </div>
       <div id="navbar">
       </div>
+      <!--
+      <div id="footer">
+        <img src={{ url_for('static', filename='button.png') }}></img>
+      </div>
+      -->
     </div>
     <script>
-      // Capture backend-provided values
-      var app_root = '{{ app_root }}'
-      var tracks = JSON.parse('{{ tracks | tojson | safe }}');
-      console.log(tracks)
-      for (var i = 0; i < tracks.length; i++) {
-        $('#navbar').append('<a class="track" href="javascript:selectTrack('+i+');"><b>'+tracks[i].title+'</b> by <b>'+tracks[i].artist+'</b></p>');
-      }
-      // !! : How to avoid global variable?
-      var CURR_TRACK = tracks.length-1;
-      selectTrack(tracks.length-1);
+      // Hide 'action' window until playlist is selected
+      $('#action').hide()
 
+      // Capture list of playlists from backend
+      var app_root = '{{ app_root }}'
+      var playlists = JSON.parse('{{ playlists | tojson | safe }}');
+      console.log(playlists)
+      for (var i = 0; i < playlists.length; i++) {
+        $('#navbar').append('<a class="playlist" href="javascript:selectPlaylist('+i+');"><p align="center"><b>'+playlists[i].name+'</b></p></a>');
+      }
+
+      // Get tracks
+      var tracks = []
+      var curr_track = 0
+
+      function selectPlaylist(ndx) {
+        // Get playlist from server
+        $.ajax(app_root + "/playlist/" + playlists[ndx].id)
+          .done(function(newTracks) {
+            // Empty navbar, populate with playlist's newTracks
+            $('#navbar').empty()
+            for (var i = 0; i < newTracks.length; i++) {
+              $('#navbar').append('<a class="track" href="javascript:selectTrack('+i+');"><p align="center"><b>'+newTracks[i].title+'</b> by <b>'+newTracks[i].artist+'</b></p></a>');
+            }
+            // !! : How to avoid global variable?
+            // Populate global newTracks variable
+            tracks = newTracks
+            curr_track = tracks.length-1;
+            selectTrack(tracks.length-1);
+            $('#action').show()
+          });
+      }
 
       function selectTrack(ndx) {
         // Set state
-        CURR_TRACK = ndx;
+        curr_track = ndx;
 
         // Set cover art, title, and artist
         $('#cover_art').attr('src', tracks[ndx].art_url); 
@@ -66,7 +92,7 @@
 
       function submitComment() {
         var comment = {
-          song_id: tracks[CURR_TRACK].id,
+          song_id: tracks[curr_track].id,
           comment: $('#comment-submission').val()
         };
         console.log(comment)
@@ -78,7 +104,7 @@
           contentType: 'application/json',
           data: JSON.stringify(comment)
         }).done(function(data) {
-          selectTrack(CURR_TRACK); 
+          selectTrack(curr_track); 
         });
       }
     </script>
